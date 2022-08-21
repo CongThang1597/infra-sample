@@ -29,6 +29,8 @@ resource "aws_iam_policy" "ssm" {
         "Effect" = "Allow"
         "Action" = [
           "ssm:Get*",
+          "s3:*",
+          "ses:*"
         ]
         "Resource" = "*"
       }

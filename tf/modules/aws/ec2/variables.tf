@@ -34,3 +34,22 @@ variable "key_pair_name" {
   type    = string
   default = "ec2-private-key"
 }
+
+variable "ami_address" {
+  type    = string
+  default = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+}
+
+variable "ami_owners" {
+  type    = list(string)
+  default = ["099720109477"]
+}
+
+variable "associate_public_ip_address" {
+  type    = bool
+  default = false
+}
+
+variable "vpc_cidr" {
+  type = string
+}

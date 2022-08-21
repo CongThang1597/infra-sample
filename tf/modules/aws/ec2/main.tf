@@ -3,7 +3,7 @@ data "aws_ami" "ami" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+    values = [var.ami_address]
   }
 
   filter {
@@ -11,7 +11,7 @@ data "aws_ami" "ami" {
     values = ["hvm"]
   }
 
-  owners = ["099720109477"] # Canonical
+  owners = var.ami_owners
 }
 
 resource "aws_instance" "instance" {
@@ -20,7 +20,7 @@ resource "aws_instance" "instance" {
   key_name                    = aws_key_pair.this.id
   vpc_security_group_ids      = [aws_security_group.sg.id]
   subnet_id                   = var.subnet_id
-  associate_public_ip_address = true
+  associate_public_ip_address = var.associate_public_ip_address
 
   root_block_device {
     volume_size           = var.volume_size
@@ -36,7 +36,7 @@ resource "aws_security_group" "sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.vpc_cidr]
   }
 
   egress {

@@ -17,4 +17,11 @@ locals {
 
   aws_region = "ap-southeast-1"
 
+  backend_domain_name = "api.snack.beauty"
+
+  vpn = {
+    vpn_client_cidr        = "20.7.0.0/16"
+    client_certificate_arn = "",
+    server_certificate_arn = "",
+  }
 }

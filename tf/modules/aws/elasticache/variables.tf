@@ -89,3 +89,12 @@ variable "subnet_ids" {
 variable "aws_security_group_ids" {
   type = list(string)
 }
+
+variable "replicas_per_node_group" {
+  type = number
+}
+
+variable "log_retention_in_days" {
+  type    = number
+  default = 30
+}

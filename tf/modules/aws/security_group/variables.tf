@@ -9,3 +9,12 @@ variable "alb_sg_name" {
 variable "common_sg_name" {
   type = string
 }
+
+variable "internal_sg_name" {
+  type = string
+}
+
+variable "cidr_blocks" {
+  type = string
+}
+

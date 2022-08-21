@@ -2,7 +2,7 @@
 #  Elastic IP
 #======================================
 resource "aws_eip" "nat" {
-  count = 1
+  count = 3
   vpc   = true
 }
 
@@ -19,7 +19,7 @@ module "vpc" {
   private_subnets     = local.vpc.private_subnets # 残 10.7.224.0/19
   enable_nat_gateway  = true
   enable_vpn_gateway  = true
-  single_nat_gateway  = true
+  single_nat_gateway  = false
   reuse_nat_ips       = true
   external_nat_ip_ids = aws_eip.nat.*.id
 }
@@ -29,10 +29,12 @@ module "vpc" {
 #======================================
 
 module "security_group" {
-  source         = "../../modules/aws/security_group"
-  vpc_id         = module.vpc.vpc_id
-  alb_sg_name    = "${local.project}-${local.environment}-alb"
-  common_sg_name = "${local.project}-${local.environment}-common"
+  source           = "../../modules/aws/security_group"
+  vpc_id           = module.vpc.vpc_id
+  alb_sg_name      = "${local.project}-${local.environment}-alb"
+  common_sg_name   = "${local.project}-${local.environment}-common"
+  internal_sg_name = "${local.project}-${local.environment}-ínternal"
+  cidr_blocks      = local.vpc.cidr
 }
 
 #======================================
@@ -60,7 +62,7 @@ module "backend_ecs" {
   source                = "../../modules/aws/ecs"
   cluster_name          = aws_ecs_cluster.main.name
   cluster_id            = aws_ecs_cluster.main.id
-  ecs_task_role_name    = "${local.project}-${local.environment}-rbo-backend-task-execution"
+  ecs_task_role_name    = "${local.project}-${local.environment}-backend-task-execution"
   task_name             = "backend"
   retention_in_days     = 30
   environment           = local.environment
@@ -70,7 +72,7 @@ module "backend_ecs" {
   port                  = 8000
   fargate_cpu           = 512
   fargate_memory        = 1024
-  repository_name       = "${local.aws_image_registry}/${local.project}/${local.environment}/rbo-backend"
+  repository_name       = "${local.aws_image_registry}/${local.project}/${local.environment}/backend"
   image_tag             = ":latest"
   aws_region            = local.aws_region
   schedule_task         = 0
@@ -85,7 +87,7 @@ module "backend_ecs" {
 module "backend_alb" {
   source                     = "terraform-aws-modules/alb/aws"
   version                    = "~> 6.0"
-  name                       = "${local.project}-${local.environment}-api"
+  name                       = "${local.project}-${local.environment}-backend"
   load_balancer_type         = "application"
   vpc_id                     = module.vpc.vpc_id
   subnets                    = module.vpc.public_subnets
@@ -97,7 +99,7 @@ module "backend_alb" {
 
   target_groups = [
     {
-      name             = "${local.project}-${local.environment}-rbo-backend"
+      name             = "${local.project}-${local.environment}-backend"
       backend_protocol = "HTTP"
       backend_port     = 8000
       target_type      = "ip"
@@ -144,7 +146,7 @@ module "backend_alb" {
 
 module "backend_alb_access_log_bucket" {
   source      = "../../modules/aws/alb_access_log"
-  bucket_name = "${local.project}-${local.environment}-rbo-backend-alb-logs"
+  bucket_name = "${local.project}-${local.environment}-backend-alb-logs"
 }
 
 #======================================
@@ -153,7 +155,7 @@ module "backend_alb_access_log_bucket" {
 
 resource "aws_route53_record" "backend" {
   type    = "A"
-  name    = "api.snack.beauty"
+  name    = local.backend_domain_name
   zone_id = local.zone_id
 
   alias {
@@ -241,11 +243,12 @@ module "elastic_cache" {
   family                     = "redis6.0"
   parameter_group_name       = "default.redis6.x.cluster.on"
   number_cache_clusters      = 2
+  replicas_per_node_group    = 1
   automatic_failover_enabled = true
   multi_az_enabled           = true
   vpc_id                     = module.vpc.vpc_id
   subnet_ids                 = module.vpc.private_subnets
-  aws_security_group_ids     = [module.security_group.common_id]
+  aws_security_group_ids     = [module.security_group.internal_id]
 }
 
 #======================================
@@ -253,13 +256,17 @@ module "elastic_cache" {
 #======================================
 
 module "ec2" {
-  source        = "../../modules/aws/ec2"
-  vpc_id        = module.vpc.vpc_id
-  subnet_id     = module.vpc.private_subnets.0
-  environment   = local.environment
-  instance_name = "BLC1"
-  instance_type = "t2.small"
-  project       = local.project
+  source                      = "../../modules/aws/ec2"
+  vpc_id                      = module.vpc.vpc_id
+  subnet_id                   = module.vpc.private_subnets.0
+  environment                 = local.environment
+  instance_name               = "${local.project}-${local.environment}-BLC"
+  instance_type               = "t2.small"
+  project                     = local.project
+  associate_public_ip_address = false
+  volume_size                 = 32
+  vpc_cidr                    = local.vpc.cidr
+  key_pair_name               = "${local.project}-${local.environment}-BLC"
 }
 
 #======================================
@@ -267,11 +274,14 @@ module "ec2" {
 #======================================
 
 module "client-vpn" {
-  source              = "../../modules/aws/client-vpn"
-  vpc_id              = module.vpc.vpc_id
-  cidr                = "10.6.0.0/16"
-  name                = "client-vpn"
-  subnet_ids          = module.vpc.private_subnets
+  source                 = "../../modules/aws/client-vpn"
+  vpc_id                 = module.vpc.vpc_id
+  client_cidr            = local.vpn.vpn_client_cidr
+  allowed_cidr_ranges    = local.vpc.private_subnets
+  name                   = "${local.project}-${local.environment}-client-vpn"
+  subnet_ids             = module.vpc.private_subnets
+  client_certificate_arn = local.vpn.client_certificate_arn
+  server_certificate_arn = local.vpn.server_certificate_arn
 }
 
 #======================================
@@ -279,6 +289,17 @@ module "client-vpn" {
 #======================================
 
 module "static-metadata-file" {
-  source              = "../../modules/aws/s3"
-  bucket_name         = "${local.project}-${local.environment}-static-metadata"
+  source      = "../../modules/aws/s3"
+  bucket_name = "${local.project}-${local.environment}-static-metadata"
+}
+
+
+#======================================
+#  S3 Bucket
+#======================================
+
+module "cloudtrail" {
+  source      = "../../modules/aws/cloudtrail"
+  environment = local.environment
+  project     = local.project
 }

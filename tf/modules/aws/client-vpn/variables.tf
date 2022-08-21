@@ -2,7 +2,7 @@ variable "name" {
   description = "Name prefix for the resources of this stack"
 }
 
-variable "cidr" {
+variable "client_cidr" {
   description = "Network CIDR to use for clients"
 }
 
@@ -73,4 +73,12 @@ variable "enable_self_service_portal" {
   type        = bool
   default     = false
   description = "Specify whether to enable the self-service portal for the Client VPN endpoint"
+}
+
+variable "server_certificate_arn" {
+  type = string
+}
+
+variable "client_certificate_arn" {
+  type = string
 }
