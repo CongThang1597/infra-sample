@@ -20,3 +20,10 @@ module "acm_alb" {
   source           = "../../modules/aws/alb_acm"
   root_domain_name = "snack.beauty"
 }
+
+module "ses" {
+  source           = "../../modules/aws/ses"
+  domain           = "snack.beauty"
+  email_address    = "snack@snack.beauty"
+  zone_id          = "Z10100782EHJ2W85PY045"
+}
