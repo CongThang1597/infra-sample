@@ -5,7 +5,7 @@ provider "aws" {
     tags = {
       Project    = "rbo"
       Env        = "development"
-      Repository = "https://git.vmo.dev/c12/rbo22077-rbo-blockchain/rbo-dev/rbo-backend"
+      Repository = "https://git.vmo.dev/c12/rbo22077-rbo-blockchain/rbo-dev/rbo-web-admin"
     }
   }
 }
