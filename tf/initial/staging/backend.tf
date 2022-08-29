@@ -7,9 +7,9 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "rbo-s3-development-tfstate"
+    bucket         = "rbo-s3-staging-tfstate"
     region         = "ap-northeast-1"
-    key            = "terraform-s3-backend.tfstate"
+    key            = "terraform-initial-resource.tfstate"
     encrypt        = true
     profile        = "rbo-master"
   }

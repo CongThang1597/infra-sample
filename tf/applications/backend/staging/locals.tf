@@ -9,14 +9,14 @@ locals {
     private_subnets = ["10.7.128.0/19", "10.7.160.0/19", "10.7.192.0/19"]
   }
 
-  alb_acm     = ""
-  zone_id = ""
+  alb_acm = "arn:aws:acm:ap-northeast-1:794293228777:certificate/c9e078a9-76a2-496f-85da-b823b07e365a"
+  zone_id = "Z0385594DZ7HIG1O2YUI"
 
   aws_account_id = "794293228777"
 
   aws_region = "ap-northeast-1"
 
-  backend_domain_name = ""
+  backend_domain_name = "api.staging-cvalue.jp"
 
   vpn = {
     vpn_client_cidr        = "20.7.0.0/16"

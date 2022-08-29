@@ -4,7 +4,7 @@ provider "aws" {
   default_tags {
     tags = {
       Project    = "rbo"
-      Env        = "development"
+      Env        = "staging"
       Repository = "https://git.vmo.dev/c12/rbo22077-rbo-blockchain/rbo-dev/rbo-backend"
     }
   }

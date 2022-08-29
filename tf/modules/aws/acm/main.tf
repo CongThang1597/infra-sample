@@ -1,6 +1,7 @@
 provider "aws" {
   alias  = "virginia"
   region = "us-east-1"
+  profile = var.profile
 }
 
 resource "aws_acm_certificate" "ssl_certificate" {
