@@ -1,7 +1,7 @@
 locals {
   project            = "rbo"
   environment        = "development"
-  aws_image_registry = "872692067237.dkr.ecr.ap-northeast-1.amazonaws.com"
+  aws_image_registry = ""
 
 }
 
@@ -13,17 +13,18 @@ module "rbo-backend-ecr" {
 
 module "acm" {
   source           = "../../modules/aws/acm"
-  root_domain_name = "snack.beauty"
+  root_domain_name = ""
+  profile          = "rbo-master"
 }
 
 module "acm_alb" {
   source           = "../../modules/aws/alb_acm"
-  root_domain_name = "snack.beauty"
+  root_domain_name = ""
 }
 
 module "ses" {
-  source           = "../../modules/aws/ses"
-  domain           = "snack.beauty"
-  email_address    = "snack@snack.beauty"
-  zone_id          = "Z10100782EHJ2W85PY045"
+  source        = "../../modules/aws/ses"
+  domain        = ""
+  email_address = ""
+  zone_id       = ""
 }

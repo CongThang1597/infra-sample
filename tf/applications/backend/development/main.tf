@@ -285,7 +285,7 @@ module "client-vpn" {
 }
 
 #======================================
-#  S3 Bucket
+#  Cloudtrail
 #======================================
 
 module "cloudtrail" {
@@ -294,9 +294,37 @@ module "cloudtrail" {
   project     = local.project
 }
 
+#======================================
+#  S3 Bucket
+#======================================
 
 module "static-metadata-file" {
   source        = "../../../modules/aws/s3"
   bucket_name   = "${local.project}-${local.environment}-metadata"
   attach_policy = 0
+}
+
+#======================================
+#  Backup IAM Role
+#======================================
+
+module "ec2-backup-iam-role" {
+  source      = "../../../modules/aws/backup_iam"
+  environment = local.environment
+  project     = local.project
+  account_id  = data.aws_caller_identity.current.account_id
+}
+
+#======================================
+#  Backup EC2
+#======================================
+
+module "ec2-backup" {
+  source                  = "../../../modules/aws/backups"
+  environment             = local.environment
+  project                 = local.project
+  action_name             = "ec2-backup"
+  schedule                = "cron(0 12 * * ? *)"
+  selection_resources     = [module.ec2.ec2_arn]
+  backup_service_role_arn = module.ec2-backup-iam-role.backup_service_role_arn
 }
