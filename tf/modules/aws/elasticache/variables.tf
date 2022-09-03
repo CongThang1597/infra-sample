@@ -3,8 +3,7 @@ variable "vpc_id" {
 }
 
 variable "cluster_name" {
-  type    = string
-  default = "test-redis"
+  type = string
 }
 
 variable "number_cache_clusters" {
@@ -19,7 +18,7 @@ variable "engine" {
 
 variable "engine_version" {
   type    = string
-  default = "5.0.6"
+  default = "6.x"
 }
 
 variable "node_type" {
@@ -29,7 +28,7 @@ variable "node_type" {
 
 variable "family" {
   type    = string
-  default = "redis5.0"
+  default = "redis6.0"
 }
 
 variable "port" {
@@ -39,7 +38,7 @@ variable "port" {
 
 variable "parameter_group_name" {
   type    = string
-  default = "default.redis5.0"
+  default = "default.redis6.x.cluster.on"
 }
 
 variable "automatic_failover_enabled" {
@@ -97,4 +96,8 @@ variable "replicas_per_node_group" {
 variable "log_retention_in_days" {
   type    = number
   default = 30
+}
+
+variable "auth_token" {
+  type = string
 }

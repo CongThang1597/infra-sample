@@ -2,7 +2,7 @@
 #  Elastic IP
 #======================================
 resource "aws_eip" "nat" {
-  count = 3
+  count = 1
   vpc   = true
 }
 
@@ -19,7 +19,7 @@ module "vpc" {
   private_subnets     = local.vpc.private_subnets # 残 10.7.224.0/19
   enable_nat_gateway  = true
   enable_vpn_gateway  = true
-  single_nat_gateway  = false
+  single_nat_gateway  = true
   reuse_nat_ips       = true
   external_nat_ip_ids = aws_eip.nat.*.id
 }
@@ -62,17 +62,17 @@ module "backend_ecs" {
   source                = "../../../modules/aws/ecs"
   cluster_name          = aws_ecs_cluster.main.name
   cluster_id            = aws_ecs_cluster.main.id
-  ecs_task_role_name    = "${local.project}-${local.environment}-backend-task-execution"
-  task_name             = "backend"
+  ecs_task_role_name    = "${local.project}-${local.environment}-${local.project}-backend-task-execution"
+  task_name             = "${local.project}-backend"
   retention_in_days     = 30
   environment           = local.environment
   project               = local.project
   security_groups       = [module.security_group.common_id]
   subnet_ids            = module.vpc.private_subnets
-  port                  = 8000
-  fargate_cpu           = 512
-  fargate_memory        = 1024
-  repository_name       = "${local.aws_image_registry}/${local.project}/${local.environment}/backend"
+  port                  = 8080
+  fargate_cpu           = 256
+  fargate_memory        = 512
+  repository_name       = "${local.aws_image_registry}/${local.project}/${local.environment}/${local.project}-backend"
   image_tag             = ":latest"
   aws_region            = local.aws_region
   schedule_task         = 0
@@ -87,7 +87,7 @@ module "backend_ecs" {
 module "backend_alb" {
   source                     = "terraform-aws-modules/alb/aws"
   version                    = "~> 6.0"
-  name                       = "${local.project}-${local.environment}-backend"
+  name                       = "${local.project}-${local.environment}-${local.project}-backend"
   load_balancer_type         = "application"
   vpc_id                     = module.vpc.vpc_id
   subnets                    = module.vpc.public_subnets
@@ -99,9 +99,9 @@ module "backend_alb" {
 
   target_groups = [
     {
-      name             = "${local.project}-${local.environment}-backend"
+      name             = "${local.project}-${local.environment}-${local.project}-backend"
       backend_protocol = "HTTP"
-      backend_port     = 8000
+      backend_port     = 8080
       target_type      = "ip"
       health_check     = {
         enabled             = true
@@ -146,7 +146,7 @@ module "backend_alb" {
 
 module "backend_alb_access_log_bucket" {
   source      = "../../../modules/aws/alb_access_log"
-  bucket_name = "${local.project}-${local.environment}-backend-alb-logs"
+  bucket_name = "${local.project}-${local.environment}-${local.project}-backend-alb-logs"
 }
 
 #======================================
@@ -173,7 +173,7 @@ module "backend_auto_scaling" {
   source                  = "../../../modules/aws/auto_scaling"
   cluster_name            = "${local.project}-${local.environment}"
   task_name               = "backend"
-  service_name            = "${local.project}-${local.environment}-backend-service"
+  service_name            = "${local.project}-${local.environment}-${local.project}-backend-service"
   scaling_up_adjustment   = 1
   scaling_down_adjustment = -1
   cpu_high_threshold      = "85"
@@ -249,6 +249,7 @@ module "elastic_cache" {
   vpc_id                     = module.vpc.vpc_id
   subnet_ids                 = module.vpc.private_subnets
   aws_security_group_ids     = [module.security_group.internal_id]
+  auth_token                 = "12345678aA"
 }
 
 #======================================

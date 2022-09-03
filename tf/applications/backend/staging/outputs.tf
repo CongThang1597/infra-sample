@@ -1,6 +1,7 @@
 output "main" {
   sensitive = true
   value = {
+#    configuration_endpoint_address = module.elastic_cache.configuration_endpoint_address
     #    ecr = {
     #      backend = module.rbo-backend-ecr.repository_url
     #    },

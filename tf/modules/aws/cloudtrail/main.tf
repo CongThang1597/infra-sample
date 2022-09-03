@@ -1,4 +1,4 @@
-resource "aws_cloudtrail" "foobar" {
+resource "aws_cloudtrail" "cloudtrail" {
   name                          = "${var.project}-${var.environment}-cloudtrail"
   s3_bucket_name                = aws_s3_bucket.cloudtrail.id
   s3_key_prefix                 = "trail"

@@ -16,7 +16,7 @@ locals {
 
   aws_region = "ap-northeast-1"
 
-  backend_domain_name = ""
+  backend_domain_name = "api."
 
   vpn = {
     vpn_client_cidr        = "20.7.0.0/16"

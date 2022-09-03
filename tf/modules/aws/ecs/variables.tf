@@ -54,7 +54,7 @@ variable "image_tag" {
 }
 
 variable "port" {
-  type = number
+  type    = number
   default = null
 }
 
@@ -63,12 +63,12 @@ variable "cluster_id" {
 }
 
 variable "target_group_arn" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "http_tcp_listener_arn" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -77,3 +77,7 @@ variable "schedule_task" {
   default = 0
 }
 
+variable "logs_retention_in_days" {
+  type    = number
+  default = 30
+}
