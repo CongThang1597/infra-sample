@@ -8,15 +8,15 @@ module "static-metadata-file" {
   attach_policy = 0
 }
 
-##======================================
-##  Cloudtrail
-##======================================
-#
-#module "cloudtrail" {
-#  source      = "../../../modules/aws/cloudtrail"
-#  environment = local.environment
-#  project     = local.project
-#}
+#======================================
+#  Cloudtrail
+#======================================
+
+module "cloudtrail" {
+  source      = "../../../modules/aws/cloudtrail"
+  environment = local.environment
+  project     = local.project
+}
 
 #======================================
 #  Elastic IP
@@ -248,27 +248,42 @@ resource "aws_wafv2_web_acl_association" "web_acl_association_my_lb" {
   resource_arn = module.backend_alb.lb_arn
   web_acl_arn  = aws_wafv2_web_acl.waf_acl.arn
 }
-#
-##======================================
-##  Elastic Cache: Redis CLuster
-##======================================
-#
-#module "elastic_cache" {
-#  source                     = "../../../modules/aws/elasticache"
-#  cluster_name               = "${local.project}-${local.environment}-elasticache"
-#  node_type                  = "cache.t2.micro"
-#  engine_version             = "6.x"
-#  family                     = "redis6.0"
-#  parameter_group_name       = "default.redis6.x.cluster.on"
-#  number_cache_clusters      = 2
-#  replicas_per_node_group    = 1
-#  transit_encryption_enabled = true
-#  auth_token                 = "Z4IKuaF8fvyGdUCE"
-#  automatic_failover_enabled = true
-#  multi_az_enabled           = true
-#  vpc_id                     = module.vpc.vpc_id
-#  subnet_ids                 = module.vpc.private_subnets
-#  aws_security_group_ids     = [module.security_group.internal_id]
-#}
 
+#======================================
+#  Elastic Cache: Redis CLuster
+#======================================
 
+module "elastic_cache" {
+  source                     = "../../../modules/aws/elasticache"
+  cluster_name               = "${local.project}-${local.environment}-elasticache"
+  node_type                  = "cache.t2.micro"
+  engine_version             = "6.x"
+  family                     = "redis6.0"
+  parameter_group_name       = "default.redis6.x.cluster.on"
+  number_cache_clusters      = 1
+  replicas_per_node_group    = 2
+  transit_encryption_enabled = false
+  automatic_failover_enabled = true
+  multi_az_enabled           = true
+  vpc_id                     = module.vpc.vpc_id
+  subnet_ids                 = module.vpc.public_subnets
+  aws_security_group_ids     = [
+    module.security_group.common_id, module.security_group.alb_id,
+    module.security_group.internal_id
+  ]
+}
+
+#======================================
+#  VPC Client VPN
+#======================================
+
+module "client-vpn" {
+  source                 = "../../../modules/aws/client-vpn"
+  vpc_id                 = module.vpc.vpc_id
+  client_cidr            = local.vpn.vpn_client_cidr
+  allowed_cidr_ranges    = local.vpc.private_subnets
+  name                   = "${local.project}-${local.environment}-client-vpn"
+  subnet_ids             = module.vpc.private_subnets
+  client_certificate_arn = local.vpn.client_certificate_arn
+  server_certificate_arn = local.vpn.server_certificate_arn
+}

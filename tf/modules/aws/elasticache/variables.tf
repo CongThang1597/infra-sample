@@ -99,5 +99,6 @@ variable "log_retention_in_days" {
 }
 
 variable "auth_token" {
-  type = string
+  type    = string
+  default = ""
 }

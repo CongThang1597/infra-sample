@@ -16,7 +16,6 @@ resource "aws_elasticache_replication_group" "main" {
   automatic_failover_enabled = var.automatic_failover_enabled
   multi_az_enabled           = var.multi_az_enabled
   transit_encryption_enabled = var.transit_encryption_enabled
-  auth_token                 = var.auth_token
   at_rest_encryption_enabled = var.at_rest_encryption_enabled
   apply_immediately          = var.apply_immediately
 

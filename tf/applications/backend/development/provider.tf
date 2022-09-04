@@ -1,6 +1,6 @@
 provider "aws" {
-  region  = "ap-northeast-1"
-  profile = "rbo-master"
+  region  = "ap-southeast-1"
+  profile = "default"
   default_tags {
     tags = {
       Project    = "rbo"

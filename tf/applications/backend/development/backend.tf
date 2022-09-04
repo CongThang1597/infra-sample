@@ -7,10 +7,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "rbo-s3-development-tfstate"
-    region         = "ap-northeast-1"
+    bucket         = "rbo-check-ag-local-development-tfstate"
+    region         = "ap-southeast-1"
     key            = "terraform-s3-backend.tfstate"
     encrypt        = true
-    profile        = "rbo-master"
+    profile        = "default"
   }
 }

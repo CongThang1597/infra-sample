@@ -9,3 +9,7 @@ output "instance-public-ip" {
 output "ec2_arn" {
   value = aws_instance.instance.arn
 }
+
+output "ec2-sg" {
+  value = aws_security_group.sg.id
+}
