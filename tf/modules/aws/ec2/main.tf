@@ -18,7 +18,7 @@ resource "aws_instance" "instance" {
   ami                         = data.aws_ami.ami.id
   instance_type               = var.instance_type
   key_name                    = aws_key_pair.this.id
-  vpc_security_group_ids      = [aws_security_group.sg.id]
+  vpc_security_group_ids      = var.security_groups
   subnet_id                   = var.subnet_id
   associate_public_ip_address = var.associate_public_ip_address
 
@@ -27,28 +27,6 @@ resource "aws_instance" "instance" {
     delete_on_termination = true
   }
 }
-
-resource "aws_security_group" "sg" {
-  name        = "${var.project}-${var.environment}-${var.instance_name}"
-  description = "${var.project}-${var.environment}-${var.instance_name}-sg"
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  vpc_id = var.vpc_id
-}
-
 
 resource "tls_private_key" "this" {
   algorithm = "RSA"

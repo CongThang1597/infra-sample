@@ -10,6 +10,10 @@ output "ec2_arn" {
   value = aws_instance.instance.arn
 }
 
-output "ec2-sg" {
-  value = aws_security_group.sg.id
+output "ec2_subnet_id" {
+  value = aws_instance.instance.subnet_id
+}
+
+output "ec2_instance_id" {
+  value = aws_instance.instance.id
 }

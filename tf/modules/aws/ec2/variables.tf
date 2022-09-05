@@ -53,3 +53,7 @@ variable "associate_public_ip_address" {
 variable "vpc_cidr" {
   type = string
 }
+
+variable "security_groups" {
+  type = list(string)
+}

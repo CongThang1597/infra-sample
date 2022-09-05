@@ -270,6 +270,7 @@ module "ec2" {
   volume_size                 = 8
   vpc_cidr                    = local.vpc.cidr
   key_pair_name               = "${local.project}-${local.environment}-BLC"
+  security_groups             = [module.security_group.internal_id, module.security_group.ssh_id]
 }
 
 #======================================

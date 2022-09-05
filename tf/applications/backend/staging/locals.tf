@@ -20,7 +20,7 @@ locals {
 
   vpn = {
     vpn_client_cidr        = "20.7.0.0/16"
-    client_certificate_arn = "",
-    server_certificate_arn = "",
+    server_certificate_arn = "arn:aws:acm:ap-northeast-1:794293228777:certificate/ec6d3629-81a3-4c0e-8ecb-7070af1764ea",
+    client_certificate_arn = "arn:aws:acm:ap-northeast-1:794293228777:certificate/e28cc043-692f-4191-b92d-2397a6f1b5ae",
   }
 }

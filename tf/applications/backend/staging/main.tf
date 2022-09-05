@@ -9,16 +9,6 @@ module "static-metadata-file" {
 }
 
 #======================================
-#  Cloudtrail
-#======================================
-
-module "cloudtrail" {
-  source      = "../../../modules/aws/cloudtrail"
-  environment = local.environment
-  project     = local.project
-}
-
-#======================================
 #  Elastic IP
 #======================================
 #resource "aws_eip" "nat" {
@@ -31,15 +21,15 @@ module "cloudtrail" {
 #======================================
 
 module "vpc" {
-  source              = "terraform-aws-modules/vpc/aws"
-  name                = "${local.project}-${local.environment}"
-  cidr                = local.vpc.cidr
-  azs                 = data.aws_availability_zones.available.names
-  public_subnets      = local.vpc.public_subnets  # 残 10.7.96.0/19
-  private_subnets     = local.vpc.private_subnets # 残 10.7.224.0/19
-  enable_nat_gateway  = true
-  enable_vpn_gateway  = true
-  single_nat_gateway  = true
+  source             = "terraform-aws-modules/vpc/aws"
+  name               = "${local.project}-${local.environment}"
+  cidr               = local.vpc.cidr
+  azs                = data.aws_availability_zones.available.names
+  public_subnets     = local.vpc.public_subnets  # 残 10.7.96.0/19
+  private_subnets    = local.vpc.private_subnets # 残 10.7.224.0/19
+  enable_nat_gateway = true
+  enable_vpn_gateway = true
+  single_nat_gateway = true
 }
 
 #======================================
@@ -47,12 +37,14 @@ module "vpc" {
 #======================================
 
 module "security_group" {
-  source           = "../../../modules/aws/security_group"
-  vpc_id           = module.vpc.vpc_id
-  alb_sg_name      = "${local.project}-${local.environment}-alb"
-  common_sg_name   = "${local.project}-${local.environment}-common"
-  internal_sg_name = "${local.project}-${local.environment}-internal"
-  cidr_blocks      = local.vpc.cidr
+  source             = "../../../modules/aws/security_group"
+  vpc_id             = module.vpc.vpc_id
+  alb_sg_name        = "${local.project}-${local.environment}-alb"
+  common_sg_name     = "${local.project}-${local.environment}-common"
+  internal_sg_name   = "${local.project}-${local.environment}-internal"
+  ssh_sg_name        = "${local.project}-${local.environment}-ssh"
+  cidr_blocks        = local.vpc.cidr
+  client_cidr_blocks = local.vpn.vpn_client_cidr
 }
 
 #======================================
@@ -88,8 +80,8 @@ module "backend_ecs" {
   security_groups       = [module.security_group.common_id]
   subnet_ids            = module.vpc.private_subnets
   port                  = 8000
-  fargate_cpu           = 256
-  fargate_memory        = 512
+  fargate_cpu           = 512
+  fargate_memory        = 1024
   repository_name       = "${local.aws_image_registry}/${local.project}/${local.environment}/${local.project}-backend"
   image_tag             = ":latest"
   aws_region            = local.aws_region
@@ -203,7 +195,7 @@ module "backend_auto_scaling" {
 #======================================
 
 resource "aws_wafv2_web_acl" "waf_acl" {
-  name  = "${local.project}-${local.environment}-web_acl"
+  name  = "${local.project}-${local.environment}-backend-web_acl"
   scope = "REGIONAL"
 
   default_action {
@@ -235,7 +227,7 @@ resource "aws_wafv2_web_acl" "waf_acl" {
 
   visibility_config {
     cloudwatch_metrics_enabled = false
-    metric_name                = "${local.project}-${local.environment}-web_acl"
+    metric_name                = "${local.project}-${local.environment}-backend-web_acl"
     sampled_requests_enabled   = false
   }
 }
@@ -252,26 +244,26 @@ resource "aws_wafv2_web_acl_association" "web_acl_association_my_lb" {
 #======================================
 #  Elastic Cache: Redis CLuster
 #======================================
-
-module "elastic_cache" {
-  source                     = "../../../modules/aws/elasticache"
-  cluster_name               = "${local.project}-${local.environment}-elasticache"
-  node_type                  = "cache.t2.micro"
-  engine_version             = "6.x"
-  family                     = "redis6.0"
-  parameter_group_name       = "default.redis6.x.cluster.on"
-  number_cache_clusters      = 1
-  replicas_per_node_group    = 2
-  transit_encryption_enabled = false
-  automatic_failover_enabled = true
-  multi_az_enabled           = true
-  vpc_id                     = module.vpc.vpc_id
-  subnet_ids                 = module.vpc.public_subnets
-  aws_security_group_ids     = [
-    module.security_group.common_id, module.security_group.alb_id,
-    module.security_group.internal_id
-  ]
-}
+#
+#module "elastic_cache" {
+#  source                     = "../../../modules/aws/elasticache"
+#  cluster_name               = "${local.project}-${local.environment}-elasticache"
+#  node_type                  = "cache.t2.micro"
+#  engine_version             = "6.x"
+#  family                     = "redis6.0"
+#  parameter_group_name       = "default.redis6.x.cluster.on"
+#  number_cache_clusters      = 1
+#  replicas_per_node_group    = 1
+#  transit_encryption_enabled = false
+#  automatic_failover_enabled = true
+#  multi_az_enabled           = true
+#  vpc_id                     = module.vpc.vpc_id
+#  subnet_ids                 = module.vpc.public_subnets
+#  aws_security_group_ids     = [
+#    module.security_group.common_id, module.security_group.alb_id,
+#    module.security_group.internal_id
+#  ]
+#}
 
 #======================================
 #  VPC Client VPN
@@ -287,3 +279,23 @@ module "client-vpn" {
   client_certificate_arn = local.vpn.client_certificate_arn
   server_certificate_arn = local.vpn.server_certificate_arn
 }
+
+#
+##======================================
+##  Bastion EC2 Instance
+##======================================
+#
+#module "bastion-ec2" {
+#  source                      = "../../../modules/aws/ec2"
+#  vpc_id                      = module.vpc.vpc_id
+#  subnet_id                   = module.vpc.private_subnets.0
+#  environment                 = local.environment
+#  instance_name               = "${local.project}-${local.environment}-bastion"
+#  instance_type               = "t2.micro"
+#  project                     = local.project
+#  associate_public_ip_address = false
+#  volume_size                 = 8
+#  vpc_cidr                    = local.vpc.cidr
+#  key_pair_name               = "${local.project}-${local.environment}-bastion"
+#  security_groups             = [module.security_group.internal_id, module.security_group.ssh_id]
+#}

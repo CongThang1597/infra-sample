@@ -1,0 +1,87 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            61:30:52:dd:4f:75:bb:0d:d2:ca:c9:55:06:e3:a6:bb
+    Signature Algorithm: sha256WithRSAEncryption
+        Issuer: CN=rbo-staging
+        Validity
+            Not Before: Sep  5 04:44:22 2022 GMT
+            Not After : Dec  8 04:44:22 2024 GMT
+        Subject: CN=rbo.staging.server
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:a4:31:76:a5:9c:19:01:07:bd:26:d0:ef:40:87:
+                    cf:ed:19:36:20:ac:89:a4:5a:c1:3f:e9:4a:f0:b5:
+                    c0:cf:e3:31:6b:76:2e:a5:d6:fd:f7:9c:16:9d:85:
+                    9e:7a:25:52:90:fc:f7:66:e6:57:d0:0e:5a:b2:9f:
+                    f1:9c:12:16:93:2e:7a:be:6d:33:e9:a4:8f:59:e6:
+                    a6:e2:dc:04:07:5c:e5:a4:dd:76:99:2e:70:79:f2:
+                    7c:15:ab:b9:50:f6:86:29:e2:91:86:bf:87:eb:32:
+                    92:57:f8:e5:13:bc:bf:cd:d8:81:2f:00:be:98:f5:
+                    c5:9f:7a:b4:d5:0f:f6:4c:c2:9f:9d:22:ce:aa:20:
+                    b4:06:fa:fa:f3:02:fa:c0:93:4b:03:2a:60:22:3f:
+                    94:55:98:e0:90:c6:b9:c7:6e:b5:a6:75:c8:4f:0c:
+                    8a:9b:05:77:57:fc:0d:84:36:0e:49:f7:a6:95:1f:
+                    a4:ea:dc:7f:41:c2:b0:58:95:11:0b:3a:70:c3:73:
+                    f0:bf:50:46:f0:ec:e0:00:0e:56:a9:c8:53:85:74:
+                    ce:e2:23:57:1b:91:b1:b7:5a:ce:3a:90:93:db:99:
+                    51:7c:98:92:49:a1:ad:1f:91:6b:0b:73:a0:78:27:
+                    09:5d:e3:3d:a6:cc:13:8c:5b:83:c0:2a:32:1d:9f:
+                    22:bd
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Subject Key Identifier: 
+                2D:00:F1:9C:F5:24:4B:F3:6B:AB:86:98:BA:C9:BF:1C:E9:74:EE:94
+            X509v3 Authority Key Identifier: 
+                keyid:40:FA:F6:82:4B:9B:8F:FA:57:EA:7C:F0:F4:20:6B:99:06:61:00:A6
+                DirName:/CN=rbo-staging
+                serial:E9:BA:87:53:27:8B:AF:98
+
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication
+            X509v3 Key Usage: 
+                Digital Signature, Key Encipherment
+            X509v3 Subject Alternative Name: 
+                DNS:rbo.staging.server
+    Signature Algorithm: sha256WithRSAEncryption
+         a6:41:91:91:2e:35:53:6c:33:76:35:a5:a7:67:bf:8c:d3:38:
+         e4:65:83:fe:3b:80:4a:f1:33:bf:b3:12:78:11:78:eb:58:0d:
+         52:9f:d5:04:c1:1f:48:af:a5:ed:03:86:f1:68:e6:c3:2b:40:
+         26:af:0f:ea:33:68:88:ea:46:04:f8:78:d9:e1:e5:bb:80:de:
+         97:34:e4:29:51:c1:75:39:26:72:fd:2d:d9:a6:2a:ce:1d:5e:
+         3e:bd:41:01:d9:62:6d:59:2e:e0:11:f1:58:d8:17:9a:57:7a:
+         4b:bf:78:49:54:ea:98:47:fc:99:63:cb:2f:ea:dc:cb:79:0b:
+         8d:ff:ec:e5:11:f2:01:dc:90:ba:57:66:eb:cf:f7:42:2c:79:
+         03:d9:0c:34:02:0e:cd:20:21:9e:8d:a6:16:87:a0:c5:f1:23:
+         6a:08:ac:54:82:f0:ca:33:c2:67:8c:18:88:d1:b1:4e:2e:6b:
+         1c:da:6e:8d:97:34:6f:2d:10:e5:44:9e:46:33:30:b0:c1:49:
+         eb:bb:d3:8d:66:09:d3:1d:be:eb:73:e4:50:1a:a5:23:2a:b1:
+         e6:60:ee:d2:1f:80:6e:6d:8f:a3:bc:5b:49:b2:08:9d:cc:20:
+         f3:48:35:05:5c:df:01:d2:4d:52:97:1a:5f:4c:32:16:d0:c1:
+         65:05:e3:a9
+-----BEGIN CERTIFICATE-----
+MIIDdDCCAlygAwIBAgIQYTBS3U91uw3SyslVBuOmuzANBgkqhkiG9w0BAQsFADAW
+MRQwEgYDVQQDDAtyYm8tc3RhZ2luZzAeFw0yMjA5MDUwNDQ0MjJaFw0yNDEyMDgw
+NDQ0MjJaMB0xGzAZBgNVBAMMEnJiby5zdGFnaW5nLnNlcnZlcjCCASIwDQYJKoZI
+hvcNAQEBBQADggEPADCCAQoCggEBAKQxdqWcGQEHvSbQ70CHz+0ZNiCsiaRawT/p
+SvC1wM/jMWt2LqXW/fecFp2FnnolUpD892bmV9AOWrKf8ZwSFpMuer5tM+mkj1nm
+puLcBAdc5aTddpkucHnyfBWruVD2hinikYa/h+syklf45RO8v83YgS8Avpj1xZ96
+tNUP9kzCn50izqogtAb6+vMC+sCTSwMqYCI/lFWY4JDGucdutaZ1yE8MipsFd1f8
+DYQ2Dkn3ppUfpOrcf0HCsFiVEQs6cMNz8L9QRvDs4AAOVqnIU4V0zuIjVxuRsbda
+zjqQk9uZUXyYkkmhrR+RawtzoHgnCV3jPabME4xbg8AqMh2fIr0CAwEAAaOBtjCB
+szAJBgNVHRMEAjAAMB0GA1UdDgQWBBQtAPGc9SRL82urhpi6yb8c6XTulDBGBgNV
+HSMEPzA9gBRA+vaCS5uP+lfqfPD0IGuZBmEApqEapBgwFjEUMBIGA1UEAwwLcmJv
+LXN0YWdpbmeCCQDpuodTJ4uvmDATBgNVHSUEDDAKBggrBgEFBQcDATALBgNVHQ8E
+BAMCBaAwHQYDVR0RBBYwFIIScmJvLnN0YWdpbmcuc2VydmVyMA0GCSqGSIb3DQEB
+CwUAA4IBAQCmQZGRLjVTbDN2NaWnZ7+M0zjkZYP+O4BK8TO/sxJ4EXjrWA1Sn9UE
+wR9Ir6XtA4bxaObDK0Amrw/qM2iI6kYE+HjZ4eW7gN6XNOQpUcF1OSZy/S3ZpirO
+HV4+vUEB2WJtWS7gEfFY2BeaV3pLv3hJVOqYR/yZY8sv6tzLeQuN/+zlEfIB3JC6
+V2brz/dCLHkD2Qw0Ag7NICGejaYWh6DF8SNqCKxUgvDKM8JnjBiI0bFOLmsc2m6N
+lzRvLRDlRJ5GMzCwwUnru9ONZgnTHb7rc+RQGqUjKrHmYO7SH4BubY+jvFtJsgid
+zCDzSDUFXN8B0k1SlxpfTDIW0MFlBeOp
+-----END CERTIFICATE-----

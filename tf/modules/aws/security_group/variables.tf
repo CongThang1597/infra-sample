@@ -18,3 +18,10 @@ variable "cidr_blocks" {
   type = string
 }
 
+variable "client_cidr_blocks" {
+  type = string
+}
+
+variable "ssh_sg_name" {
+  type = string
+}
