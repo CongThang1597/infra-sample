@@ -350,3 +350,30 @@ module "blockchain-ec2-node-3" {
   security_groups             = [module.security_group.internal_id, module.security_group.ssh_id]
   key_pair_id                 = module.blockchain-ec2-node-1.key_pair_id
 }
+
+#======================================
+#  Backup IAM Role
+#======================================
+
+module "ec2-backup-iam-role" {
+  source      = "../../../modules/aws/backup_iam"
+  environment = local.environment
+  project     = local.project
+  account_id  = data.aws_caller_identity.current.account_id
+}
+
+#======================================
+#  Backup EC2
+#======================================
+
+module "ec2-backup" {
+  source                  = "../../../modules/aws/backups"
+  environment             = local.environment
+  project                 = local.project
+  action_name             = "blockchain-ec2-backup"
+  schedule                = "cron(0 20 * * ? *)"
+  selection_resources     = [
+    module.blockchain-ec2-node-1.ec2_arn, module.blockchain-ec2-node-2.ec2_arn, module.blockchain-ec2-node-3.ec2_arn
+  ]
+  backup_service_role_arn = module.ec2-backup-iam-role.backup_service_role_arn
+}

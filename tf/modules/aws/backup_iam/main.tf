@@ -28,29 +28,14 @@ resource "aws_iam_role" "aws-backup-service-role" {
   name               = "${var.project}-${var.environment}-aws-backup-service-role"
   description        = "Allows the AWS Backup Service to take scheduled backups"
   assume_role_policy = data.aws_iam_policy_document.aws_iam_policy_document.json
-
-  tags = {
-    Project     = var.project
-    Environment = var.environment
-  }
 }
 
 resource "aws_iam_role_policy" "backup-service-aws-backup-role-policy" {
   policy = data.aws_iam_policy.aws-backup-service-policy.policy
   role   = aws_iam_role.aws-backup-service-role.name
-
-  tags = {
-    Project     = var.project
-    Environment = var.environment
-  }
 }
 
 resource "aws_iam_role_policy" "backup-service-pass-role-policy" {
   policy = data.aws_iam_policy_document.pass-role-policy-doc.json
   role   = aws_iam_role.aws-backup-service-role.name
-
-  tags = {
-    Project     = var.project
-    Environment = var.environment
-  }
 }
