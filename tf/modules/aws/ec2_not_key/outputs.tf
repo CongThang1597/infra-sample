@@ -17,7 +17,3 @@ output "ec2_subnet_id" {
 output "ec2_instance_id" {
   value = aws_instance.instance.id
 }
-
-output "key_pair_id" {
-  value = aws_key_pair.this.id
-}

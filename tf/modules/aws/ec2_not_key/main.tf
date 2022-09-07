@@ -17,7 +17,7 @@ data "aws_ami" "ami" {
 resource "aws_instance" "instance" {
   ami                         = data.aws_ami.ami.id
   instance_type               = var.instance_type
-  key_name                    = aws_key_pair.this.id
+  key_name                    = var.key_pair_id
   vpc_security_group_ids      = var.security_groups
   subnet_id                   = var.subnet_id
   associate_public_ip_address = var.associate_public_ip_address
@@ -29,21 +29,5 @@ resource "aws_instance" "instance" {
 
   tags = {
     Name = var.instance_name
-  }
-}
-
-resource "tls_private_key" "this" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "aws_key_pair" "this" {
-  key_name   = var.key_pair_name
-  public_key = tls_private_key.this.public_key_openssh
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      echo "${tls_private_key.this.private_key_pem}" > "${var.key_pair_name}.pem"
-    EOT
   }
 }

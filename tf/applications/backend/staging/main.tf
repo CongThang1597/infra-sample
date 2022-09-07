@@ -299,3 +299,54 @@ module "client-vpn" {
 #  key_pair_name               = "${local.project}-${local.environment}-bastion"
 #  security_groups             = [module.security_group.internal_id, module.security_group.ssh_id]
 #}
+
+#======================================
+#  Blockchain EC2 Instance Node 1
+#======================================
+
+module "blockchain-ec2-node-1" {
+  source                      = "../../../modules/aws/ec2"
+  vpc_id                      = module.vpc.vpc_id
+  subnet_id                   = module.vpc.private_subnets.0
+  environment                 = local.environment
+  instance_name               = "${local.project}-${local.environment}-blockchain-node-1"
+  instance_type               = "t3.large"
+  project                     = local.project
+  associate_public_ip_address = false
+  volume_size                 = 50
+  vpc_cidr                    = local.vpc.cidr
+  key_pair_name               = "${local.project}-${local.environment}-blockchain"
+  security_groups             = [module.security_group.internal_id, module.security_group.ssh_id]
+}
+
+module "blockchain-ec2-node-2" {
+  source                      = "../../../modules/aws/ec2_not_key"
+  vpc_id                      = module.vpc.vpc_id
+  subnet_id                   = module.vpc.private_subnets.0
+  environment                 = local.environment
+  instance_name               = "${local.project}-${local.environment}-blockchain-node-2"
+  instance_type               = "t3.large"
+  project                     = local.project
+  associate_public_ip_address = false
+  volume_size                 = 32
+  vpc_cidr                    = local.vpc.cidr
+  key_pair_name               = "${local.project}-${local.environment}-blockchain"
+  security_groups             = [module.security_group.internal_id, module.security_group.ssh_id]
+  key_pair_id                 = module.blockchain-ec2-node-1.key_pair_id
+}
+
+module "blockchain-ec2-node-3" {
+  source                      = "../../../modules/aws/ec2_not_key"
+  vpc_id                      = module.vpc.vpc_id
+  subnet_id                   = module.vpc.private_subnets.0
+  environment                 = local.environment
+  instance_name               = "${local.project}-${local.environment}-blockchain-node-3"
+  instance_type               = "t3.large"
+  project                     = local.project
+  associate_public_ip_address = false
+  volume_size                 = 32
+  vpc_cidr                    = local.vpc.cidr
+  key_pair_name               = "${local.project}-${local.environment}-blockchain"
+  security_groups             = [module.security_group.internal_id, module.security_group.ssh_id]
+  key_pair_id                 = module.blockchain-ec2-node-1.key_pair_id
+}
