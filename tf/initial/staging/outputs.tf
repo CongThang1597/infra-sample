@@ -1,7 +1,8 @@
 output "main" {
   value = {
     ecr = {
-      backend = module.rbo-backend-ecr.repository_url
+      backend = module.rbo-backend-ecr.repository_url,
+      schedule = module.rbo-backend-schedule-ecr.repository_url
     },
     acm = {
       certificate_arn     = module.acm.certificate_arn,

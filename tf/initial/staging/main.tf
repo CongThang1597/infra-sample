@@ -11,6 +11,12 @@ module "rbo-backend-ecr" {
   keep_last_image = 3
 }
 
+module "rbo-backend-schedule-ecr" {
+  source          = "../../modules/aws/ecr"
+  repository_name = "${local.project}/${local.environment}/rbo-backend-schedule"
+  keep_last_image = 3
+}
+
 module "acm" {
   source           = "../../modules/aws/acm"
   root_domain_name = "staging-cvalue.jp"

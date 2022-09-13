@@ -91,6 +91,46 @@ module "backend_ecs" {
 }
 
 #======================================
+# Schedule ECS Service
+#======================================
+
+module "schedule_ecs" {
+  source             = "../../../modules/aws/ecs"
+  cluster_name       = aws_ecs_cluster.main.name
+  cluster_id         = aws_ecs_cluster.main.id
+  ecs_task_role_name = "${local.project}-${local.environment}-${local.project}-backend-schedule-task-execution"
+  task_name          = "${local.project}-backend-schedule"
+  retention_in_days  = 30
+  environment        = local.environment
+  project            = local.project
+  security_groups    = [module.security_group.common_id]
+  subnet_ids         = module.vpc.private_subnets
+  fargate_cpu        = 512
+  fargate_memory     = 1024
+  repository_name    = "${local.aws_image_registry}/${local.project}/${local.environment}/${local.project}-backend-schedule"
+  image_tag          = ":latest"
+  aws_region         = local.aws_region
+  schedule_task      = 1
+}
+
+#======================================
+# Schedule Event
+#======================================
+
+module "event_schedule_task" {
+  source                        = "../../../modules/aws/schedule_task"
+  cluster_name                  = aws_ecs_cluster.main.name
+  cluster_arn                   = aws_ecs_cluster.main.arn
+  task_name                     = "${local.project}-backend-schedule"
+  security_groups               = [module.security_group.common_id]
+  subnet_ids                    = module.vpc.private_subnets
+  task_definition_arn           = module.schedule_ecs.task_definition_arn
+  schedule_expression           = "cron(45 16 * * ? *)"
+  task_definition_exec_role_arn = module.schedule_ecs.ecs_task_exec_role_arn
+  task_count                    = 1
+}
+
+#======================================
 # Application LoadBalance
 #======================================
 
@@ -244,26 +284,26 @@ resource "aws_wafv2_web_acl_association" "web_acl_association_my_lb" {
 #======================================
 #  Elastic Cache: Redis CLuster
 #======================================
-#
-#module "elastic_cache" {
-#  source                     = "../../../modules/aws/elasticache"
-#  cluster_name               = "${local.project}-${local.environment}-elasticache"
-#  node_type                  = "cache.t2.micro"
-#  engine_version             = "6.x"
-#  family                     = "redis6.0"
-#  parameter_group_name       = "default.redis6.x.cluster.on"
-#  number_cache_clusters      = 1
-#  replicas_per_node_group    = 1
-#  transit_encryption_enabled = false
-#  automatic_failover_enabled = true
-#  multi_az_enabled           = true
-#  vpc_id                     = module.vpc.vpc_id
-#  subnet_ids                 = module.vpc.public_subnets
-#  aws_security_group_ids     = [
-#    module.security_group.common_id, module.security_group.alb_id,
-#    module.security_group.internal_id
-#  ]
-#}
+
+module "elastic_cache" {
+  source                     = "../../../modules/aws/elasticache"
+  cluster_name               = "${local.project}-${local.environment}-elasticache"
+  node_type                  = "cache.t2.micro"
+  engine_version             = "6.x"
+  family                     = "redis6.0"
+  parameter_group_name       = "default.redis6.x.cluster.on"
+  number_cache_clusters      = 1
+  replicas_per_node_group    = 1
+  transit_encryption_enabled = false
+  automatic_failover_enabled = true
+  multi_az_enabled           = true
+  vpc_id                     = module.vpc.vpc_id
+  subnet_ids                 = module.vpc.private_subnets
+  aws_security_group_ids     = [
+    module.security_group.common_id, module.security_group.alb_id,
+    module.security_group.internal_id
+  ]
+}
 
 #======================================
 #  VPC Client VPN
@@ -279,26 +319,6 @@ module "client-vpn" {
   client_certificate_arn = local.vpn.client_certificate_arn
   server_certificate_arn = local.vpn.server_certificate_arn
 }
-
-#
-##======================================
-##  Bastion EC2 Instance
-##======================================
-#
-#module "bastion-ec2" {
-#  source                      = "../../../modules/aws/ec2"
-#  vpc_id                      = module.vpc.vpc_id
-#  subnet_id                   = module.vpc.private_subnets.0
-#  environment                 = local.environment
-#  instance_name               = "${local.project}-${local.environment}-bastion"
-#  instance_type               = "t2.micro"
-#  project                     = local.project
-#  associate_public_ip_address = false
-#  volume_size                 = 8
-#  vpc_cidr                    = local.vpc.cidr
-#  key_pair_name               = "${local.project}-${local.environment}-bastion"
-#  security_groups             = [module.security_group.internal_id, module.security_group.ssh_id]
-#}
 
 #======================================
 #  Blockchain EC2 Instance Node 1
@@ -319,6 +339,10 @@ module "blockchain-ec2-node-1" {
   security_groups             = [module.security_group.internal_id, module.security_group.ssh_id]
 }
 
+#======================================
+#  Blockchain EC2 Instance Node 2
+#======================================
+
 module "blockchain-ec2-node-2" {
   source                      = "../../../modules/aws/ec2_not_key"
   vpc_id                      = module.vpc.vpc_id
@@ -334,6 +358,10 @@ module "blockchain-ec2-node-2" {
   security_groups             = [module.security_group.internal_id, module.security_group.ssh_id]
   key_pair_id                 = module.blockchain-ec2-node-1.key_pair_id
 }
+
+#======================================
+#  Blockchain EC2 Instance Node 3
+#======================================
 
 module "blockchain-ec2-node-3" {
   source                      = "../../../modules/aws/ec2_not_key"
@@ -367,13 +395,102 @@ module "ec2-backup-iam-role" {
 #======================================
 
 module "ec2-backup" {
-  source                  = "../../../modules/aws/backups"
-  environment             = local.environment
-  project                 = local.project
-  action_name             = "blockchain-ec2-backup"
-  schedule                = "cron(0 20 * * ? *)"
-  selection_resources     = [
+  source              = "../../../modules/aws/backups"
+  environment         = local.environment
+  project             = local.project
+  action_name         = "blockchain-ec2-backup"
+  schedule            = "cron(0 20 * * ? *)"
+  selection_resources = [
     module.blockchain-ec2-node-1.ec2_arn, module.blockchain-ec2-node-2.ec2_arn, module.blockchain-ec2-node-3.ec2_arn
   ]
   backup_service_role_arn = module.ec2-backup-iam-role.backup_service_role_arn
+}
+
+#======================================
+# Application LoadBalance
+#======================================
+
+module "blockchain_node_alb" {
+  source                     = "terraform-aws-modules/alb/aws"
+  version                    = "~> 6.0"
+  name                       = "${local.project}-${local.environment}-blockchain-node"
+  load_balancer_type         = "application"
+  vpc_id                     = module.vpc.vpc_id
+  subnets                    = module.vpc.private_subnets
+  enable_deletion_protection = false
+  internal                   = true
+  security_groups            = module.security_group.ids
+  access_logs                = {
+    bucket = module.blockchain_alb_access_log_bucket.bucket
+  }
+
+  target_groups = [
+    {
+      name             = "${local.project}-${local.environment}-blockchain-node"
+      backend_protocol = "HTTP"
+      backend_port     = 80
+      target_type      = "instance"
+      health_check     = {
+        enabled             = true
+        interval            = 30
+        path                = "/"
+        port                = "traffic-port"
+        healthy_threshold   = 3
+        unhealthy_threshold = 3
+        timeout             = 6
+        protocol            = "HTTP"
+        matcher             = "200-399"
+      }
+      targets = {
+        node_1 = {
+          target_id = module.blockchain-ec2-node-1.id
+          port      = 8545
+        },
+        node_2 = {
+          target_id = module.blockchain-ec2-node-1.id
+          port      = 8546
+        },
+        node_3 = {
+          target_id = module.blockchain-ec2-node-2.id
+          port      = 8545
+        },
+        node_4 = {
+          target_id = module.blockchain-ec2-node-3.id
+          port      = 8545
+        },
+      }
+    }
+  ]
+
+  http_tcp_listeners = [
+    {
+      port        = 80
+      protocol    = "HTTP"
+      action_type = "redirect"
+      redirect    = {
+        port        = "443"
+        protocol    = "HTTPS"
+        status_code = "HTTP_301"
+      }
+    }
+  ]
+
+  https_listeners = [
+    {
+      port               = 443
+      protocol           = "HTTPS"
+      certificate_arn    = local.alb_acm
+      target_group_index = 0
+    }
+  ]
+}
+
+
+#======================================
+# ALB Log For Blockchain
+#======================================
+
+module "blockchain_alb_access_log_bucket" {
+  source      = "../../../modules/aws/alb_access_log"
+  bucket_name = "${local.project}-${local.environment}-blockchain-node-alb-logs"
 }
