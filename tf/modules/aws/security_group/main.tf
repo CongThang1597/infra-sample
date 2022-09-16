@@ -26,6 +26,12 @@ resource "aws_security_group" "common" {
     protocol  = -1
     self      = true
   }
+  ingress {
+    from_port   = 6379
+    to_port     = 6379
+    protocol    = "tcp"
+    cidr_blocks = [var.client_cidr_blocks]
+  }
   egress {
     from_port   = 0
     to_port     = 0

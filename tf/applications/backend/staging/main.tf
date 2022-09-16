@@ -464,22 +464,8 @@ module "blockchain_node_alb" {
 
   http_tcp_listeners = [
     {
-      port        = 80
-      protocol    = "HTTP"
-      action_type = "redirect"
-      redirect    = {
-        port        = "443"
-        protocol    = "HTTPS"
-        status_code = "HTTP_301"
-      }
-    }
-  ]
-
-  https_listeners = [
-    {
-      port               = 443
-      protocol           = "HTTPS"
-      certificate_arn    = local.alb_acm
+      port               = 80
+      protocol           = "HTTP"
       target_group_index = 0
     }
   ]

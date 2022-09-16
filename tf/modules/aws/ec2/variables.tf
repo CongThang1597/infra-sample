@@ -37,7 +37,7 @@ variable "key_pair_name" {
 
 variable "ami_address" {
   type    = string
-  default = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+  default = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20220901"
 }
 
 variable "ami_owners" {
